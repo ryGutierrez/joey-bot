@@ -15,8 +15,12 @@ module.exports = {
         }
 
         var output = '';
-        for(let video of ref.queue) {
-            output += `<${video.url}>\n`;
+        for(let i=0; i<ref.queue.length; i++) {
+            output += `<${ref.queue[i].url}>\n`;
+            if(output.length > 1000) {
+                output += `+${ref.queue.length-i} more...`
+                break;
+            }
         }
         await interaction.reply(output);
     }

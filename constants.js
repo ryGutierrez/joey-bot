@@ -5,7 +5,7 @@
  * @param {string} nowPlaying the currently playing video by the audio player
  * @param {boolean} doLoopQueue if the audio player should loop thorugh the entire queue it reaches the end
  * @param {boolean} useShuffle if the audio player should choose a random video from the queue to play instead of the queued video
- * @param {YoutubeVideo[]} queue queue of videos to be played consisting of play-dl YoutubeVideo objects (https://play-dl.github.io/classes/YouTubeVideo.html)
+ * @param {play.YoutubeVideo[]} queue queue of videos to be played consisting of play-dl YoutubeVideo objects (https://play-dl.github.io/classes/YouTubeVideo.html)
  */
 var ref = {
     doLoop: false,

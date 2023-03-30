@@ -6,6 +6,6 @@ module.exports = {
         .setName('nowplaying')
         .setDescription('Show what\'s currently playing.'),
     async execute(interaction) {
-        await interaction.reply(`Now playing ${ref.nowplaying}`);
+        await interaction.reply(ref.nowPlaying == undefined ? 'Nothing is playing right now' : `Now playing ${ref.nowPlaying}`);
     }
 }
