@@ -2,7 +2,7 @@
 Joey bot, a personal project, is a Dungeons and Dragons based music bot, with a few additions to streamline online DND sessions.
 
 ## Usage
-Joey bot uses Discords slash command system. Commands can be viewed in any discord channel by typing " / " and previewing the in-channel documentation.
+Joey bot uses Discords slash command system. Commands can be viewed in any discord channel by typing " / " and previewing the in-channel documentation. Joey bot is now also clever enough to respond to your messages in any text channel he has access too. Prefix your messages to him with `@Joey Bot` and he'll respond!
 
 ## Development
 Joey bot uses Node.js and Javascript. Follow the [Discord Development Portal documentation](https://discord.com/developers/docs/intro) for creating a discord application and bot. Joey bot was also created following the [Discord.js guide](https://discordjs.guide/) and follows the same command structure as demonstrated.
