@@ -16,8 +16,8 @@ module.exports = {
 
         var output = '';
         for(let i=0; i<ref.queue.length; i++) {
-            output += `<${ref.queue[i].url}>\n`;
-            if(output.length > 1000) {
+            output += `**${ref.queue[i].title}**  \`${ref.queue[i].durationRaw}\`\n`;
+            if(output.length > 500) {
                 output += `+${ref.queue.length-i} more...`
                 break;
             }
