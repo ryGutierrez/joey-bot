@@ -6,15 +6,17 @@ module.exports = {
         .setName('list')
         .setDescription('List the songs in the queue'),
     async execute(interaction) {
-
-        // TODO: Put list into embed and page the list when there are too many rows
-
+        if(!interaction.member.voice.channel || !interaction.member.voice.channel.isVoiceBased()) {
+            await interaction.reply('You must be in a voice channel to use this command.');
+            return;
+        }
+        
         if(ref.queue.length == 0) {
             await interaction.reply('The queue is empty');
             return;
         }
 
-        var output = '';
+        var output = ref.useShuffle ? '*Warning: shuffle is on*\n' : '';;
         for(let i=0; i<ref.queue.length; i++) {
             output += `**${ref.queue[i].title}**  \`${ref.queue[i].durationRaw}\`\n`;
             if(output.length > 500) {

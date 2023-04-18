@@ -15,6 +15,11 @@ module.exports = {
             .setRequired(true)
         ),
     async execute(interaction) {
+        if(!interaction.member.voice.channel || !interaction.member.voice.channel.isVoiceBased()) {
+            await interaction.reply('You must be in a voice channel to use this command.');
+            return;
+        }
+        
         const url = interaction.options.getString('url');
         const player = createAudioPlayer();
 
