@@ -1,6 +1,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { token } = require('./config.json');
+const { token, clientId } = require('./config.json');
+var { ref } = require('./constants.js');
+const { getVoiceConnection } = require('@discordjs/voice');
 
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const client = new Client({ intents: [
@@ -31,6 +33,8 @@ for (const folder of commandFolders) {
 	}
 }
 
+// Event handlers
+
 client.once(Events.ClientReady, c => {
     console.log(`Logged in as ${client.user.tag}...`);
 });
@@ -44,6 +48,8 @@ client.on(Events.InteractionCreate, async interaction => {
         return;
     }
 
+    ref.lastInteractedChannel = interaction.channelId;
+
     try {
         await command.execute(interaction);
     } catch (error) {
@@ -56,4 +62,37 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
+client.on(Events.VoiceStateUpdate, async c => {
+    var channel = c.channel;
+    if(!channel) {
+        return;
+    }
+    var channel = c.channel;
+    if(c.channel.members.size == 1 && channel.members.find(u => u.id == clientId)) {
+        const connection = getVoiceConnection(channel.guildId);
+        var didDisconnect = connection.disconnect();
+        if(!didDisconnect) {
+            console.log(`Error disconnecting from channel ${channel.name}`);
+        }
+        ref.queue = [];
+        ref.nowPlaying = [];
+        ref.useShuffle = false;
+        ref.doLoop = false;
+        await channel.guild.channels.cache.get(ref.lastInteractedChannel).send(`All users left #${channel.name}. Clearing and resetting audio player.`);
+    }
+});
+
 client.login(token);
+
+// Functions
+
+/**
+ * Checks if the user that made an interaction is in a voice channel
+ * @param {Interaction<CacheType>} interaction user created interaction from a command
+ * @returns true if the interaction creator (user) is in a voice channel, false otherwise
+ */
+const isInteractionUserInChannel = (interaction) => {
+    var channel = interaction.member.voice.channel;
+
+    return !interaction.member.voice.channel || !interaction.member.voice.channel.isVoiceBased() ? true : false;
+}

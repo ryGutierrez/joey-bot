@@ -14,5 +14,11 @@ git clone https://github.com/ryGutierrez/joey-bot.git
 cd joey-bot
 npm i
 ```
-Run the application within the project directory with:
+Register commands within /commands with 
+### `node deploy-commands.js`:
+
+Run the bot with 
+### `node index.js`
+
+Deploy commands and run bot concurrently with
 ### `npm start`
