@@ -1,10 +1,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { token, clientId } = require('./config.json');
+const { dev_token: token, dev_clientId: clientId } = require('./config.json');
 var { ref } = require('./constants.js');
 const { getVoiceConnection } = require('@discordjs/voice');
 
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, range } = require('discord.js');
 const client = new Client({ intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
@@ -12,6 +12,8 @@ const client = new Client({ intents: [
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildVoiceStates,
 ]});
+
+diceRegex = /^!r[0-9]+d[0-9]+(\+[0-9]+)?$/;
 
 client.commands = new Collection();
 
@@ -31,6 +33,13 @@ for (const folder of commandFolders) {
 			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
 		}
 	}
+}
+
+// functions
+
+// Return random integer in range [min, max]
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
 }
 
 // Event handlers
@@ -82,17 +91,28 @@ client.on(Events.VoiceStateUpdate, async c => {
     }
 });
 
+client.on('messageCreate', async (message) => {
+    let guild = client.guilds.cache.get(message.guildId);
+    let channel = guild.channels.cache.get(message.channelId);
+
+    if(diceRegex.test(message.content)) {
+        let numDice = parseInt(message.content.substring(message.content.search('r')+1, message.content.search('d')));
+        let numSide = parseInt(message.content.substring(message.content.search('d')+1, message.content.search('\\+') == -1 ? message.content.length+1 : message.content.search('\\+')));
+        let extra = message.content.search('\\+') != -1 ? parseInt(message.content.substring(message.content.search('\\+')+1, message.content.length+1)) : null;
+        
+        let sum = 0;
+        let diceRolls = '';
+        for(let i=0; i<numDice; i++) {
+            let n = randomInt(1, numSide);
+            diceRolls += n+', ';
+            sum += n;
+        }
+
+        await channel.send(`*${numDice}d${numSide}${extra != null ? '+'+extra : ''} by ${message.author.username}*\n${numDice > 1 ? '*'+diceRolls.substring(0, diceRolls.length-2)+'*\n' : ''}**${extra == null ? sum : sum+' + '+extra+' = '+(sum+extra)}**`);
+
+    } if(message.content === '!flipcoin') {
+        await channel.send(randomInt(0,1) == 1 ? 'heads' : 'tails');
+    }
+});
+
 client.login(token);
-
-// Functions
-
-/**
- * Checks if the user that made an interaction is in a voice channel
- * @param {Interaction<CacheType>} interaction user created interaction from a command
- * @returns true if the interaction creator (user) is in a voice channel, false otherwise
- */
-const isInteractionUserInChannel = (interaction) => {
-    var channel = interaction.member.voice.channel;
-
-    return !interaction.member.voice.channel || !interaction.member.voice.channel.isVoiceBased() ? true : false;
-}
