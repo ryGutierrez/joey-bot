@@ -1,5 +1,5 @@
 # Joey Bot
-Joey bot, a personal project, is a Dungeons and Dragons based music bot, with a few additions to streamline online DND sessions.
+Joey bot is a discord bot packed with a variety of helpful commands. Originally starting off as a music player Joey bot has been given all sorts of tricks such as rolling dice or replying to user messages with AI generated responses.
 
 ## Usage
 Joey bot uses Discords slash command system. Commands can be viewed in any discord channel by typing " / " and previewing the in-channel documentation. In addition to slash commands, Joey bot can also roll multi-sided dice with messages prefixed with " ! ". For example, in order to generate a number using a single 20 sided die use: `!r1d20` or `!r1d20+4` in order to add a certain amount to the final output.
