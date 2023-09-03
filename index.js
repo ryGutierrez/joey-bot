@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { dev_token: token, dev_clientId: clientId } = require('./config.json');
+const { token: token, clientId: clientId } = require('./config.json');
 var { ref } = require('./constants.js');
 const { getVoiceConnection } = require('@discordjs/voice');
 
@@ -13,7 +13,7 @@ const client = new Client({ intents: [
     GatewayIntentBits.GuildVoiceStates,
 ]});
 
-diceRegex = /^!r[0-9]+d[0-9]+(\+[0-9]+)?$/;
+diceRegex = /^!r[0-9]+d[0-9]+([\+\-][0-9]+)?$/;
 
 client.commands = new Collection();
 
@@ -95,11 +95,12 @@ client.on('messageCreate', async (message) => {
     let guild = client.guilds.cache.get(message.guildId);
     let channel = guild.channels.cache.get(message.channelId);
 
+    // handle dice rolls
     if(diceRegex.test(message.content)) {
         let numDice = parseInt(message.content.substring(message.content.search('r')+1, message.content.search('d')));
-        let numSide = parseInt(message.content.substring(message.content.search('d')+1, message.content.search('\\+') == -1 ? message.content.length+1 : message.content.search('\\+')));
-        let extra = message.content.search('\\+') != -1 ? parseInt(message.content.substring(message.content.search('\\+')+1, message.content.length+1)) : null;
-        
+        let numSide = parseInt(message.content.substring(message.content.search('d')+1, message.content.search(/[-+]/) == -1 ? message.content.length+1 : message.content.search(/[-+]/)));
+        let extra = message.content.search(/[-+]/) != -1 ? parseInt(message.content.substring(message.content.search(/[-+]/)+1, message.content.length+1)) : null;
+
         let sum = 0;
         let diceRolls = '';
         for(let i=0; i<numDice; i++) {
@@ -108,9 +109,15 @@ client.on('messageCreate', async (message) => {
             sum += n;
         }
 
-        await channel.send(`*${numDice}d${numSide}${extra != null ? '+'+extra : ''} by ${message.author.username}*\n${numDice > 1 ? '*'+diceRolls.substring(0, diceRolls.length-2)+'*\n' : ''}**${extra == null ? sum : sum+' + '+extra+' = '+(sum+extra)}**`);
+        message.content.search('-') != -1 ? // if the roll modifier is negative, the output should be changed and the modifier should be subtracted from sum
+            await channel.send(`*${numDice}d${numSide}${extra != null ? '-'+extra : ''} by ${message.author.username}*\n${numDice > 1 ? '*'+diceRolls.substring(0, diceRolls.length-2)+'*\n' : ''}**${extra == null ? sum : sum+' - '+extra+' = '+(sum-extra)}**`)
+        :   await channel.send(`*${numDice}d${numSide}${extra != null ? '+'+extra : ''} by ${message.author.username}*\n${numDice > 1 ? '*'+diceRolls.substring(0, diceRolls.length-2)+'*\n' : ''}**${extra == null ? sum : sum+' + '+extra+' = '+(sum+extra)}**`);
+        
 
-    } if(message.content === '!flipcoin') {
+    }
+    
+    // handle coin flips
+    if(message.content === '!flipcoin') {
         await channel.send(randomInt(0,1) == 1 ? 'heads' : 'tails');
     }
 });
