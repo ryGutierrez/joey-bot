@@ -1,7 +1,8 @@
 config.json
 .vscode
 .data
-/node_modules
+./node_modules
+./dist
 
 .dockerignore
 Dockerfile
