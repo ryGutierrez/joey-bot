@@ -28,7 +28,16 @@ export class Queue {
         // when the bot disconnects for whatever reason, destroy connection and stop audio
         // when everyone else leaves the channel, the bot should destroy connection and stop audio
         // when the player goes from Playing to Idle, shift the queue and process
+        this.player.on(AudioPlayerStatus.Idle, () => {
+            if(this.loop && this.queue.length) {
+                this.queue.push(this.queue.shift()!);
+            } else {
+                this.queue.shift();
+                if(!this.queue.length) return this.stopAudio();
+            }
 
+            if(this.queue.length || this.player) this.processQueue();
+        });
     }
 
     public async processQueue(): Promise<void> {
