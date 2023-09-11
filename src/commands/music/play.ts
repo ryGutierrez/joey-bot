@@ -28,10 +28,7 @@ export default {
         if(queue && channel.id !== queue.connection.joinConfig.channelId)
             return await interaction.reply({ content: 'You must be in the same voice channel as the bot to use this command.', ephemeral: true }).catch(console.error);
 
-        // add playlist to the queue if url is a playlist
-
         let song;
-
         try {
             song = await Song.from(url);
         } catch (error) {

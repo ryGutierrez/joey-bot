@@ -1,4 +1,4 @@
-import { yt_validate, video_basic_info, stream } from "play-dl";
+import { yt_validate, video_basic_info, stream, playlist_info } from "play-dl";
 
 export class Song {
     public readonly url: string;
@@ -16,13 +16,24 @@ export class Song {
     /**
      * Creates a new Song object with relevant information
      * @param {Number} url - a url to a single youtube video (excluding playlists and channels)
-     * @returns {Song} - a new Song instance with details from the url source, returns null if the url is invalid
+     * @returns {Song} - a single Song or Array of Songs
      */
     public static async from(url: string) {
-        if(yt_validate(url) !== 'video') throw new Error(`${url} not a valid url`);
-        const videoDetails = (await video_basic_info(url)).video_details;
-
-        return new Song(url, videoDetails.title!, videoDetails.durationInSec, videoDetails.durationRaw);
+        const urlValidation = yt_validate(url);
+        if(urlValidation === 'video') {
+            const videoDetails = (await video_basic_info(url)).video_details;
+            return new Song(url, videoDetails.title!, videoDetails.durationInSec, videoDetails.durationRaw);
+        } else if(urlValidation === 'playlist') {
+            const playlistInfo = await playlist_info(url, {incomplete: true });
+            const allVideos = await playlistInfo.all_videos();
+            let songs = Array<Song>();
+            for(const video of allVideos) {
+                songs = songs.concat(new Song(video.url, video.title!, video.durationInSec, video.durationRaw));
+            }
+            return songs;
+        } else {
+            throw new Error(`${url} not a valid playlist or video url`);
+        }
     }
 
 }

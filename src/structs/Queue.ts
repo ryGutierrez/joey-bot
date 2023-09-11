@@ -59,7 +59,7 @@ export class Queue {
         }
     }
 
-    public enqueue(...song: Song[]) {
+    public enqueue(song: Song[] | Song): void {
         this.stopped = false;
         this.queue = this.queue.concat(song);
         this.processQueue();
