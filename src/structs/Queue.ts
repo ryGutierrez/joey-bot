@@ -66,7 +66,7 @@ export class Queue {
         this.processQueue();
     }
 
-    public stopAudio() {
+    public stopAudio(destroyVoiceConnection?: boolean) {
         if(this.stopped) return;
 
         this.stopped = true;
@@ -74,14 +74,16 @@ export class Queue {
         this.queue = [];
 
         this.player.stop();
-        if(this.connection.state.status !== VoiceConnectionStatus.Destroyed) {
+
+        if(destroyVoiceConnection && this.connection.state.status !== VoiceConnectionStatus.Destroyed) {
             try {
                 this.connection.destroy();
             } catch (error) {
                 console.error(error);
             }
+            bot.queueMap.delete(this.interaction.guildId!);
         }
-        bot.queueMap.delete(this.interaction.guildId!);
+        
     }
 
 }

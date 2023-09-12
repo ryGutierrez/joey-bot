@@ -28,8 +28,11 @@ export default {
         if(queue && channel.id !== queue.connection.joinConfig.channelId)
             return await interaction.reply({ content: 'You must be in the same voice channel as the bot to use this command.', ephemeral: true }).catch(console.error);
 
+        
+
         let song;
         try {
+            await interaction.deferReply();
             song = await Song.from(url);
         } catch (error) {
             console.error(error);
@@ -38,7 +41,8 @@ export default {
 
         if(queue) {
             queue.enqueue(song);
-            return await interaction.reply({ content: `${interaction.user.username} added ${url} to the queue.`})
+            
+            return await interaction.editReply(`${interaction.user.username} added ${url} to the queue.`);
         } else {
             const newQueue = new Queue(interaction, interaction.channel! as TextChannel, joinVoiceChannel({
                 channelId: channel.id,
@@ -49,7 +53,7 @@ export default {
             bot.queueMap.set(channel.guild.id, newQueue);
             newQueue.enqueue(song);
 
-            return await interaction.reply({ content: `${interaction.user.username} added ${url} to the queue.`});
+            return interaction.editReply({ content: `${interaction.user.username} added ${url} to the queue.`});
         }
     }
 
