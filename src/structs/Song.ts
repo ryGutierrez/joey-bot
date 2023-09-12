@@ -32,7 +32,7 @@ export class Song {
             }
             return songs;
         } else {
-            throw new Error(`${url} not a valid playlist or video url`);
+            throw new Error(`\"${url}\" invalid playlist or video url`);
         }
     }
 

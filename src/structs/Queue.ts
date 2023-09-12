@@ -15,7 +15,8 @@ export class Queue {
     public queue = new Array<Song>();
     public loop = false;
     private queueLock = false;
-    private stopped = false; 
+    private stopped = false;
+    public paused = false;
 
     public constructor(interaction: CommandInteraction, textChannel: TextChannel, connection: VoiceConnection) {
         this.connection = connection;
