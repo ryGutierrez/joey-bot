@@ -36,7 +36,7 @@ export default {
             song = await Song.from(url);
         } catch (error) {
             console.error(error);
-            return interaction.reply({ content: 'Invalid url', ephemeral: true });
+            return interaction.editReply('The url was invalid or something went wrong, please try again.');
         }
 
         if(queue) {

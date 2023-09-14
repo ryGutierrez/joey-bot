@@ -2,34 +2,36 @@ import { readdirSync } from 'fs';
 import { join } from 'path';
 import { ApplicationCommandDataResolvable, Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
 import { AudioPlayer } from '@discordjs/voice';
-import { dev_token as token, dev_clientId as clientId } from '../config.json';
-import { Command } from '../commands/Command';
+import { token, clientId, guild_id} from '../config.json';
+import { Command } from './Command';
 import { Song } from './Song';
 import { Queue } from './Queue';
-import { guild_id } from "../config.json";
 
 export class Bot {
-    public queueMap = new Collection<string, Queue>(); // Maps a single AudioPlayer to a single Guild Id
+    public queueMap = new Collection<string, Queue>();
     public commands = new Array<ApplicationCommandDataResolvable>();
     public commandsMap = new Collection<string, Command>();
+
+    public prefix = ';';
     
     public constructor(public readonly client: Client) {
         this.client.login(token);
         this.client.on('ready', ()=> {
-            console.log(`Logged in as ${this.client.user!.tag}`)
+            console.log(`Logged in as ${this.client.user!.tag}`);
             this.registerCommands();
         });
 
         this.onInteractionCreate();
+        this.onMessageCreate();
     }
 
     private async registerCommands() {
         const foldersPath = join(__dirname, '..', 'commands');
-        const commandFolders = readdirSync(foldersPath).filter(file => file!='Command.ts');
+        const commandFolders = readdirSync(foldersPath);
 
         for (const folder of commandFolders) {
             const commandsPath = join(foldersPath, folder);
-            const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith('.ts'));
+            const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
             for (const file of commandFiles) {
                 const filePath = join(commandsPath, file);
                 const command = await import(filePath);
@@ -39,7 +41,12 @@ export class Bot {
         }
         
         const rest = new REST({ version: '10' }).setToken(token);
-        await rest.put(Routes.applicationGuildCommands(this.client.user!.id, guild_id), {body: this.commands});
+        try {
+            await rest.put(Routes.applicationGuildCommands(this.client.user!.id, guild_id), {body: this.commands});
+        } catch (error) {
+            console.error(error);
+        }
+        
     }
 
     private async onInteractionCreate() {
@@ -59,6 +66,37 @@ export class Bot {
                 } else {
                     await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
                 }
+            }
+        });
+    }
+
+    private async onMessageCreate() {
+        this.client.on('messageCreate', async (message) => {
+            let channel = message.channel;
+
+            // Handle dice rolls
+            const diceRegex = new RegExp(`^${this.prefix}r[0-9]+d[0-9]+([\+\-][0-9]+)?$`);
+            if(diceRegex.test(message.content)) {
+                let numDice = parseInt(message.content.substring(message.content.search('r')+1, message.content.search('d')));
+                let numSide = parseInt(message.content.substring(message.content.search('d')+1, message.content.search(/[-+]/) == -1 ? message.content.length+1 : message.content.search(/[-+]/)));
+                let extra = message.content.search(/[-+]/) == -1 ? null : parseInt(message.content.substring(message.content.search(/[-+]/)+1, message.content.length+1));
+                let sum = 0;
+                let diceRolls = '';
+                for(let i=0; i<numDice; i++) {
+                    let n = Math.floor(Math.random() * (numSide) ) + 1;
+                    diceRolls += n+', ';
+                    sum += n;
+                }
+
+                message.content.search('-') != -1 ? // if the roll modifier is negative, the output should be changed and the modifier should be subtracted from sum
+                    await channel.send(`*${numDice}d${numSide}${extra != null ? '-'+extra : ''} by ${message.author.username}*\n${numDice > 1 ? '*'+diceRolls.substring(0, diceRolls.length-2)+'*\n' : ''}**${extra == null ? sum : sum+' - '+extra+' = '+(sum-extra)}**`)
+                :   await channel.send(`*${numDice}d${numSide}${extra != null ? '+'+extra : ''} by ${message.author.username}*\n${numDice > 1 ? '*'+diceRolls.substring(0, diceRolls.length-2)+'*\n' : ''}**${extra == null ? sum : sum+' + '+extra+' = '+(sum+extra)}**`);
+            }
+
+            // Handle coin flips
+            else if(message.content === this.prefix + 'flipcoin') {
+                const flip = Math.floor(Math.random()*2);
+                await channel.send(flip == 1 ? 'heads' : 'tails');
             }
         });
     }

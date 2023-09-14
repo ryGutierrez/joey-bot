@@ -1,4 +1,5 @@
-import { yt_validate, video_basic_info, stream, playlist_info } from "play-dl";
+import { yt_validate, video_basic_info, playlist_info } from 'play-dl';
+import YouTube from 'youtube-sr';
 
 export class Song {
     public readonly url: string;
@@ -21,14 +22,18 @@ export class Song {
     public static async from(url: string) {
         const urlValidation = yt_validate(url);
         if(urlValidation === 'video') {
-            const videoDetails = (await video_basic_info(url)).video_details;
-            return new Song(url, videoDetails.title!, videoDetails.durationInSec, videoDetails.durationRaw);
+            // const basic_info = await video_basic_info(url);
+            // const videoDetails = basic_info.video_details;
+            const video = await YouTube.getVideo(url);
+            return new Song(url, video.title!, video.duration, video.durationFormatted);
         } else if(urlValidation === 'playlist') {
-            const playlistInfo = await playlist_info(url, {incomplete: true });
-            const allVideos = await playlistInfo.all_videos();
+            // const playlistInfo = await playlist_info(url, {incomplete: true });
+            // const allVideos = await playlistInfo.all_videos();
+            const playlist = await YouTube.getPlaylist(url).then(playlist => playlist.fetch());
+            const videos = playlist.videos;
             let songs = Array<Song>();
-            for(const video of allVideos) {
-                songs = songs.concat(new Song(video.url, video.title!, video.durationInSec, video.durationRaw));
+            for(const video of videos) {
+                songs = songs.concat(new Song(video.url, video.title!, video.duration, video.durationFormatted));
             }
             return songs;
         } else {

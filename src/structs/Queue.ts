@@ -1,4 +1,4 @@
-import { AudioPlayer, AudioPlayerPlayingState, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, createDefaultAudioReceiveStreamOptions, NoSubscriberBehavior, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
+import { AudioPlayer, AudioPlayerPlayingState, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, createDefaultAudioReceiveStreamOptions, NoSubscriberBehavior, StreamType, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
 import { Song } from "./Song";
 import { bot } from "../index";
 import { CommandInteraction, TextChannel } from "discord.js";
@@ -50,7 +50,7 @@ export class Queue {
         const nextSong = this.queue[0];
         try {
             const playStream = await stream(nextSong.url);
-            const resource = createAudioResource(playStream.stream, { inputType: playStream.type });
+            const resource = createAudioResource(playStream.stream, { metadata: nextSong, inputType: StreamType.Opus });
             this.player.play(resource);
         } catch (error) {
             console.error(error);

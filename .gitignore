@@ -4,7 +4,4 @@ config.json
 ./node_modules
 ./dist
 
-.dockerignore
 Dockerfile
-
-fly.toml
