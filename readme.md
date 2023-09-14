@@ -8,17 +8,25 @@ Joey bot uses Discord's slash command system. Commands can be viewed in any disc
 Joey bot uses Typescript and Discord.js. Follow the [Discord Development Portal documentation](https://discord.com/developers/docs/intro) for creating a discord application and bot. Joey bot also uses the Command Handler from [Discord.js guide](https://discordjs.guide/).
 
 ## Installation
-Clone the project and install with npm using Node v18+
+Clone the project
 ```bash
 git clone https://github.com/ryGutierrez/joey-bot.git
 cd joey-bot
-npm i
 ```
-Register commands within /commands with 
-### `node deploy-commands.js`:
+### Install dependencies using Node v18+
+```
+npm install
+yarn install
+```
 
-Run the bot with 
-### `node index.js`
+### Run the bot with 
+```
+npm start
+yarn start
+```
 
-Deploy commands and run bot concurrently with
-### `npm start`
+### Run the bot in development with
+```
+npm dev
+yarn dev
+```
