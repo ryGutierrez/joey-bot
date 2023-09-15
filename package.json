@@ -6,7 +6,7 @@
   "author": "ryGutierrez <ryangutierrez831@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon src/index.ts",
+    "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts dev"
   },
   "dependencies": {
