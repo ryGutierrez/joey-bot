@@ -43,7 +43,7 @@ export class Queue {
         });
         
         this.player.on(AudioPlayerStatus.Idle, () => {
-            if(this.loop && this.queue.length) {
+            if(this.loop && this.queue.length > 2) {
                 this.queue.push(this.queue.shift()!);
             } else {
                 this.queue.shift();
@@ -72,7 +72,7 @@ export class Queue {
             this.queueLock = false;
         }
     }
-    
+
     public enqueueSkip(song: Song[], skipCurrent?: boolean): void {
         this.stopped = false;
 

@@ -10,7 +10,6 @@ export default {
         if(!queue) return await interaction.reply({ content: 'Add some songs to the queue before skipping!', ephemeral: true });
 
         const player = queue!.player;
-
         const nowPlaying = queue.queue[0];
 
         if(player.stop()) return await interaction.reply(`Skipped **${nowPlaying.title}**`);
