@@ -41,7 +41,7 @@ export class Bot {
         
         const rest = new REST({ version: '10' }).setToken(token);
         try {
-            await rest.put(Routes.applicationGuildCommands(this.client.user!.id, guild_id), {body: this.commands});
+            await rest.put(Routes.applicationCommands(this.client.user!.id), {body: this.commands});
         } catch (error) {
             console.error(error);
         }

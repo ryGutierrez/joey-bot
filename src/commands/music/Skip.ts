@@ -1,4 +1,4 @@
-import { CommandInteraction, ChatInputApplicationCommandData, Client, SlashCommandBuilder } from "discord.js";
+import { CommandInteraction, ChatInputApplicationCommandData, Client, SlashCommandBuilder } from 'discord.js';
 import { bot } from '../../index';
 
 export default {
@@ -11,7 +11,7 @@ export default {
 
         const player = queue!.player;
 
-        const nowPlaying = queue.queue[0]
+        const nowPlaying = queue.queue[0];
 
         if(player.stop()) return await interaction.reply(`Skipped **${nowPlaying.title}**`);
         else return await interaction.reply({ content: 'Something went wrong, please try again', ephemeral: true });

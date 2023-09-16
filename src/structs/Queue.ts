@@ -4,6 +4,7 @@ import { bot } from "../index";
 import { Client, CommandInteraction, Events, TextChannel } from "discord.js";
 import { stream } from "play-dl";
 import { clientId } from '../config.json';
+import nowplaying from "../commands/music/nowplaying";
 
 export class Queue {
     public readonly player: AudioPlayer;
@@ -71,10 +72,22 @@ export class Queue {
             this.queueLock = false;
         }
     }
-
-    public enqueue(song: Song[] | Song): void {
+    
+    public enqueueSkip(song: Song[], skipCurrent?: boolean): void {
         this.stopped = false;
-        this.queue = this.queue.concat(song);
+
+        let nowPlaying = this.queue.splice(0, 1);
+        this.queue.unshift(...song);
+        this.queue = nowPlaying.concat(this.queue);
+
+        if(skipCurrent) this.player.stop();
+
+        this.processQueue();
+    }
+
+    public enqueue(song: Song[]): void {
+        this.stopped = false;
+        this.queue.push(...song);
         this.processQueue();
     }
 
