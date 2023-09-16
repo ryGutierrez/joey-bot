@@ -48,7 +48,7 @@ export default {
                 channelId: channel.id,
                 guildId: channel.guild.id,
                 adapterCreator: channel.guild.voiceAdapterCreator
-            }));
+            }), client);
 
             bot.queueMap.set(channel.guild.id, newQueue);
             newQueue.enqueue(song);

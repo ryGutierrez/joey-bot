@@ -1,10 +1,8 @@
 import { readdirSync } from 'fs';
 import { join } from 'path';
 import { ApplicationCommandDataResolvable, Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
-import { AudioPlayer } from '@discordjs/voice';
 import { token, clientId, guild_id} from '../config.json';
 import { Command } from './Command';
-import { Song } from './Song';
 import { Queue } from './Queue';
 
 export class Bot {
@@ -23,6 +21,7 @@ export class Bot {
 
         this.onInteractionCreate();
         this.onMessageCreate();
+        
     }
 
     private async registerCommands() {

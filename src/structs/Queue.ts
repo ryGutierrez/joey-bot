@@ -1,8 +1,9 @@
 import { AudioPlayer, AudioPlayerPlayingState, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, createDefaultAudioReceiveStreamOptions, NoSubscriberBehavior, StreamType, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
 import { Song } from "./Song";
 import { bot } from "../index";
-import { CommandInteraction, TextChannel } from "discord.js";
+import { Client, CommandInteraction, Events, TextChannel } from "discord.js";
 import { stream } from "play-dl";
+import { clientId } from '../config.json';
 
 export class Queue {
     public readonly player: AudioPlayer;
@@ -18,17 +19,28 @@ export class Queue {
     private stopped = false;
     public paused = false;
 
-    public constructor(interaction: CommandInteraction, textChannel: TextChannel, connection: VoiceConnection) {
+    public constructor(interaction: CommandInteraction, textChannel: TextChannel, connection: VoiceConnection, client: Client) {
         this.connection = connection;
         this.textChannel = textChannel;
         this.interaction = interaction;
         this.player = createAudioPlayer();
         this.connection.subscribe(this.player);
 
-        // listeners
-        // when the bot disconnects for whatever reason, destroy connection and stop audio
-        // when everyone else leaves the channel, the bot should destroy connection and stop audio
-        // when the player goes from Playing to Idle, shift the queue and process
+        this.connection.on(VoiceConnectionStatus.Disconnected, () => {
+            this.stopAudio(true);
+        });
+
+        client.on(Events.VoiceStateUpdate, async (channel) => {
+            if(!channel.channel) return;
+            
+            const members = channel.channel!.members;
+
+            if(members.size != 1) return;
+            if(!members.find(user => user.id == clientId)) return;
+
+            this.stopAudio(true);
+        });
+        
         this.player.on(AudioPlayerStatus.Idle, () => {
             if(this.loop && this.queue.length) {
                 this.queue.push(this.queue.shift()!);
