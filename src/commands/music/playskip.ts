@@ -43,7 +43,8 @@ export default {
         }
 
         if(queue) {
-            queue.enqueueSkip(song, playNow!);
+            if(queue.queue.length == 0) queue.enqueue(song, playNow!);
+            else queue.enqueueSkip(song, playNow!);
             
             return await interaction.editReply(`${interaction.user.username} added ${url} to the queue.`);
         } else {

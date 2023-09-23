@@ -85,9 +85,12 @@ export class Queue {
         this.processQueue();
     }
 
-    public enqueue(song: Song[]): void {
+    public enqueue(song: Song[], skipCurrent?: boolean): void {
         this.stopped = false;
         this.queue.push(...song);
+
+        if(skipCurrent) this.player.stop();
+        
         this.processQueue();
     }
 
