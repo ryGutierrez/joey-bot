@@ -7,7 +7,7 @@ export default {
         .setDescription('skip what\'s currently playing'),
     async execute(client: Client, interaction: CommandInteraction) {
         const queue = bot.queueMap.get(interaction.guildId!);
-        if(!queue) return await interaction.reply({ content: 'Add some songs to the queue before skipping!', ephemeral: true });
+        if(!queue || queue.queue.length == 0) return await interaction.reply({ content: 'Add some songs to the queue before skipping!', ephemeral: true });
 
         const player = queue!.player;
         const nowPlaying = queue.queue[0];
