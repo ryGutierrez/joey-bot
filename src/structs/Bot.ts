@@ -1,21 +1,26 @@
 import { readdirSync } from 'fs';
 import { join } from 'path';
-import { ApplicationCommandDataResolvable, Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
-import { token, clientId, guild_id} from '../config.json';
+import { ActivityType, ApplicationCommandDataResolvable, Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
+import { TOKEN, DEV_TOKEN, GUILD_ID} from '../config.json';
 import { Command } from './Command';
 import { Queue } from './Queue';
+
+const runDev = process.argv.includes('dev');
+const token = runDev ? DEV_TOKEN : TOKEN;
+const guildId = GUILD_ID;    
 
 export class Bot {
     public queueMap = new Collection<string, Queue>();
     public commands = new Array<ApplicationCommandDataResolvable>();
     public commandsMap = new Collection<string, Command>();
 
-    public prefix = ';';
+    public prefix = '!';
     
     public constructor(public readonly client: Client) {
         this.client.login(token);
         this.client.on('ready', ()=> {
             console.log(`Logged in as ${this.client.user!.tag}`);
+            this.client.user!.setActivity('/help', { type: ActivityType.Listening });
             this.registerCommands();
         });
 
@@ -41,7 +46,10 @@ export class Bot {
         
         const rest = new REST({ version: '10' }).setToken(token);
         try {
-            await rest.put(Routes.applicationCommands(this.client.user!.id), {body: this.commands});
+            if(runDev)
+                await rest.put(Routes.applicationGuildCommands(this.client.user!.id, guildId), {body: this.commands});
+            else
+                await rest.put(Routes.applicationCommands(this.client.user!.id), {body: this.commands});
         } catch (error) {
             console.error(error);
         }
@@ -50,22 +58,26 @@ export class Bot {
 
     private async onInteractionCreate() {
         this.client.on(Events.InteractionCreate, async interaction => {
-            if(!interaction.isChatInputCommand()) return;
-            const command = this.commandsMap.get(interaction.commandName);
-            if(!command) {
-                console.error(`No command matching ${interaction.commandName} was found.`);
-                return;
-            }
-            try {
-                await command.execute(this.client, interaction);
-            } catch (error) {
-                console.error(error);
-                if(interaction.replied || interaction.deferred) {
-                    await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-                } else {
-                    await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            if(interaction.isChatInputCommand()) {
+                const command = this.commandsMap.get(interaction.commandName);
+                if(!command) {
+                    console.error(`No command matching ${interaction.commandName} was found.`);
+                    return;
                 }
+                try {
+                    await command.execute(this.client, interaction);
+                } catch (error) {
+                    console.error(error);
+                    if(interaction.replied || interaction.deferred) {
+                        await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+                    } else {
+                        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+                    }
+                }
+            } else if(interaction.isButton()) {
+                console.log('Bot.ts - button clicked...');
             }
+            
         });
     }
 

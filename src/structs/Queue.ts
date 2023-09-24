@@ -3,8 +3,9 @@ import { Song } from "./Song";
 import { bot } from "../index";
 import { Client, CommandInteraction, Events, TextChannel } from "discord.js";
 import { stream } from "play-dl";
-import { clientId } from '../config.json';
 import nowplaying from "../commands/music/nowplaying";
+
+
 
 export class Queue {
     public readonly player: AudioPlayer;
@@ -13,7 +14,6 @@ export class Queue {
     public readonly textChannel: TextChannel;
     public readonly interaction: CommandInteraction;
 
-    // public resource: AudioResource;
     public queue = new Array<Song>();
     public loop = false;
     private queueLock = false;
@@ -37,7 +37,7 @@ export class Queue {
             const members = channel.channel!.members;
 
             if(members.size != 1) return;
-            if(!members.find(user => user.id == clientId)) return;
+            if(!members.find(user => user.id == client.user!.id)) return;
 
             this.stopAudio(true);
         });
