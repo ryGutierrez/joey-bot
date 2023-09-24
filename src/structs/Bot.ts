@@ -1,6 +1,6 @@
 import { readdirSync } from 'fs';
 import { join } from 'path';
-import { ActivityType, ApplicationCommandDataResolvable, Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
+import { ActionRowBuilder, ActivityType, ApplicationCommandDataResolvable, ButtonBuilder, ButtonStyle, Client, Collection, EmbedBuilder, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
 import { TOKEN, DEV_TOKEN, GUILD_ID} from '../config.json';
 import { Command } from './Command';
 import { Queue } from './Queue';
@@ -56,7 +56,7 @@ export class Bot {
         
     }
 
-    private async onInteractionCreate() {
+    private async onInteractionCreate() : Promise<void> {
         this.client.on(Events.InteractionCreate, async interaction => {
             if(interaction.isChatInputCommand()) {
                 const command = this.commandsMap.get(interaction.commandName);
@@ -75,7 +75,52 @@ export class Bot {
                     }
                 }
             } else if(interaction.isButton()) {
-                console.log('Bot.ts - button clicked...');
+                const queue = this.queueMap.get(interaction.guildId!);
+                let nowPlaying = queue!.queue[0];
+                let nextSong = queue!.queue[1];
+
+                if(interaction.customId === 'skip') {
+                    const command = this.commandsMap.get('skip');
+                    if(!command) await interaction.reply({ content: 'Something went wrong, please try again.', ephemeral: true });
+                    else await command.execute(this.client, interaction);
+
+                } else if(interaction.customId === 'pause') {
+                    if(!queue || queue.queue.length == 0) {
+                        await interaction.reply({ content: 'Play something first before resuming!', ephemeral: true });
+                        return;
+                    }
+
+                    if(queue!.paused) {
+                        await interaction.reply('Audio resuming');
+                        queue!.player.unpause();
+                    }
+                    else {
+                        await interaction.reply('Audio paused');
+                        queue!.player.pause();
+                    }
+
+                    queue!.paused = !queue!.paused;
+
+                    await interaction.channel!.send({
+                        embeds: [new EmbedBuilder()
+                        .setTitle("Now Playing")
+                        .setDescription(`**${nowPlaying.title}**\n${nowPlaying.channelName}`)
+                        .setColor('#96494b')],
+                        components: [
+                            new ActionRowBuilder<ButtonBuilder>().addComponents(
+                                new ButtonBuilder()
+                                    .setCustomId('skip')
+                                    .setLabel('Skip')
+                                    .setStyle(ButtonStyle.Secondary),
+                                new ButtonBuilder()
+                                    .setCustomId('pause')
+                                    .setLabel(queue!.paused ? '\u25b6I' : 'II')
+                                    .setStyle(ButtonStyle.Primary)
+                            )
+                        ]
+                    });
+
+                }
             }
             
         });

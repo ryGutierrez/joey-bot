@@ -1,11 +1,11 @@
-import { CommandInteraction, ChatInputApplicationCommandData, Client, SlashCommandBuilder } from 'discord.js';
+import { CommandInteraction, ChatInputApplicationCommandData, Client, SlashCommandBuilder, ButtonInteraction } from 'discord.js';
 import { bot } from '../../index';
 
 export default {
     data: new SlashCommandBuilder()
         .setName('skip')
         .setDescription('skip what\'s currently playing'),
-    async execute(client: Client, interaction: CommandInteraction) {
+    async execute(client: Client, interaction: CommandInteraction | ButtonInteraction) {
         const queue = bot.queueMap.get(interaction.guildId!);
         if(!queue || queue.queue.length == 0) return await interaction.reply({ content: 'Add some songs to the queue before skipping!', ephemeral: true });
 

@@ -1,4 +1,4 @@
-import { CommandInteraction, Client, SlashCommandBuilder, ChatInputCommandInteraction, TextChannel } from "discord.js";
+import { CommandInteraction, Client, SlashCommandBuilder, ChatInputCommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { bot } from "../../index";
 import { Song } from "../../structs/Song";
 import { Queue } from "../../structs/Queue";
@@ -17,6 +17,7 @@ export default {
         const url = interaction.options.getString('url');
         const interactionUser = interaction.guild!.members.cache.get(interaction.user.id);
         const { channel } = interactionUser!.voice;
+        const textChannel = interaction.channel!;
 
         if(!channel)
             return await interaction.reply({ content: 'You must be in a voice channel to use this command!', ephemeral: true }).catch(console.error);
@@ -44,7 +45,7 @@ export default {
             
             return await interaction.editReply(`${interaction.user.username} added ${url} to the queue.`);
         } else {
-            const newQueue = new Queue(interaction, interaction.channel! as TextChannel, joinVoiceChannel({
+            const newQueue = new Queue(interaction, textChannel as TextChannel, joinVoiceChannel({
                 channelId: channel.id,
                 guildId: channel.guild.id,
                 adapterCreator: channel.guild.voiceAdapterCreator
@@ -53,7 +54,8 @@ export default {
             bot.queueMap.set(channel.guild.id, newQueue);
             newQueue.enqueue(song);
 
-            return interaction.editReply({ content: `${interaction.user.username} added ${url} to the queue.`});
+            await interaction.editReply({ content: `${interaction.user.username} added ${url} to the queue.`});
+            
         }
     }
 

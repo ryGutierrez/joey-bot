@@ -1,7 +1,7 @@
 import { AudioPlayer, AudioPlayerPlayingState, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, createDefaultAudioReceiveStreamOptions, NoSubscriberBehavior, StreamType, VoiceConnection, VoiceConnectionStatus } from "@discordjs/voice";
 import { Song } from "./Song";
 import { bot } from "../index";
-import { Client, CommandInteraction, Events, TextChannel } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, CommandInteraction, EmbedBuilder, Events, TextChannel } from "discord.js";
 import { stream } from "play-dl";
 import nowplaying from "../commands/music/nowplaying";
 
@@ -65,6 +65,26 @@ export class Queue {
             const playStream = await stream(nextSong.url);
             const resource = createAudioResource(playStream.stream, { metadata: nextSong, inputType: StreamType.Opus });
             this.player.play(resource);
+
+            await this.textChannel.send({
+                embeds: [new EmbedBuilder()
+                .setTitle("Now Playing")
+                .setDescription(`**${nextSong.title}**\n${nextSong.channelName}`)
+                .setColor('#96494b')],
+                components: [
+                    new ActionRowBuilder<ButtonBuilder>().addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('skip')
+                            .setLabel('Skip')
+                            .setStyle(ButtonStyle.Secondary),
+                        new ButtonBuilder()
+                            .setCustomId('pause')
+                            .setLabel(this.paused ? '\u25b6I' : 'II')
+                            .setStyle(ButtonStyle.Primary)
+                    )
+                ]
+            });
+
         } catch (error) {
             console.error(error);
             return this.processQueue();

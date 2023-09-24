@@ -10,6 +10,7 @@ export default {
         if(!queue) return await interaction.reply({ content: 'Play something first before pausing!', ephemeral: true });
 
         const player = queue!.player;
+        
         if(queue.paused) return await interaction.reply({ content: 'The music is already paused!', ephemeral: true });
 
         if(player.pause()) {
