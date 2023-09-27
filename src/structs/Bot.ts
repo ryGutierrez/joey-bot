@@ -120,6 +120,10 @@ export class Bot {
                         ]
                     });
 
+                } else if(interaction.customId === 'next_page') {
+                    
+                } else if(interaction.customId === 'back_page') {
+
                 }
             }
             

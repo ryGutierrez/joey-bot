@@ -1,3 +1,5 @@
+import { ActionRowBuilder, ButtonBuilder } from "@discordjs/builders";
+import { ButtonStyle, EmbedBuilder } from "discord.js";
 import { CommandInteraction, Client, SlashCommandBuilder } from 'discord.js';
 import { bot } from '../../index';
 
@@ -15,15 +17,28 @@ export default {
 
         await interaction.deferReply();
 
-        var output = '';
-        for(let i=1; i<songs.length; i++) {
-            output += `**${songs[i].title}**  \`${songs[i].durationRaw}\`\n`;
-            if(output.length > 500) {
-                output += `+${songs.length-i} more...`
-                break;
-            }
-        }
-        await interaction.editReply(output);
+        const embed = new EmbedBuilder()
+            .setTitle(`Queue for ${interaction.guild!.name}`)
+            .setFooter({ text: `Page 1/${songs.length < 10 ? '1' : Math.ceil(songs.length / 10)}` });
+
+        for(let i=0; i<10; i++) embed.addFields({ name: `${songs[i].title} \`${songs[i].durationRaw}\``, value: songs[i].channelName, inline: false });
+
+        await interaction.editReply({
+            embeds: [embed],
+            // components: [
+            //     new ActionRowBuilder<ButtonBuilder>().addComponents(
+            //         new ButtonBuilder()
+            //             .setCustomId('back_page')
+            //             .setLabel('Back')
+            //             .setStyle(ButtonStyle.Secondary)
+            //             .setDisabled(true),
+            //         new ButtonBuilder()
+            //             .setCustomId('next_page')
+            //             .setLabel('Next')
+            //             .setStyle(ButtonStyle.Secondary)
+            //     )
+            // ]
+        });
     }
 
 };
